@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" type="image/png" href="https://gehaltscheck.green-careers.de/favicon.png">
 <title>Die besten Jobs der grünen Branche – Top-Arbeitgeber melden sich bei dir | GreenCareers</title>
-<meta name="description" content="Deutschlands größtes Karrierenetzwerk für GaLaBau, Grünpflege, Baumpflege, Forst & Tiefbau. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern deiner Region vor. Kostenlos, unverbindlich, jederzeit austragbar.">
+<meta name="description" content="Deutschlands größtes Karrierenetzwerk für GaLaBau, Grünpflege, Baumpflege & Forst. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern deiner Region vor. Kostenlos, unverbindlich, jederzeit austragbar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -681,7 +681,6 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
    Struktur & Design 1:1 vom Gehalts-Check übernommen.
    Fragenlogik nach Jana (3 Ad-Gruppen):
      ?v=galabau   -> GaLaBau FA+VA        (Branche vorbelegt)
-     ?v=tiefbau   -> Straßen-/Tiefbau     (Branche vorbelegt)
      ?v=bauleiter -> GaLaBau Bauleiter    (Branche+Rolle vorbelegt, 2 Freitextfragen)
      ohne Param   -> generisch, Branche wird als Frage 1 gestellt
    ============================================================ */
@@ -714,7 +713,6 @@ const BRANCHEN = {
   pflege: {label:'Garten- & Grünpflege',     icon:'🌱', sub:'Pflege, Begrünung, Außenanlagen', short:'Grünpflege', inPhrase:'in der Grünpflege (oder artverwandt)', inShort:'in der Grünpflege'},
   baum:   {label:'Baumpflege / Baumklettern',icon:'🌳', sub:'Seilklettertechnik, Fällung', short:'Baumpflege', inPhrase:'in der Baumpflege (oder artverwandt)',   inShort:'in der Baumpflege'},
   forst:  {label:'Forst & Wald',             icon:'🪵', sub:'Forstwirtschaft, Holzernte', short:'Forst',      inPhrase:'im Forst (oder artverwandt)',            inShort:'im Forst'},
-  tiefbau:{label:'Straßen- & Tiefbau',       icon:'🚧', sub:'Straßenbau, Kanalbau, Pflaster', short:'Tiefbau', inPhrase:'im Straßen-/Tiefbau (oder artverwandt)', inShort:'im Straßen-/Tiefbau'},
 };
 
 /* ---------- Positionen je Branche (Stellenbezeichnungen wie im Gehalts-Check) ----------
@@ -769,18 +767,6 @@ const POSITIONEN = {
     {key:'helfer',    label:'Forsthelfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon im Forst gearbeitet, ohne Ausbildung', cls:'helfer'},
     {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
   ],
-  tiefbau:[
-    {key:'facharbeiter',label:'Straßenbauer:in / Tiefbaufacharbeiter:in', icon:'🚧', sub:'Geselle / Facharbeiter', cls:'fach'},
-    {key:'geraete',     label:'Baugeräteführer:in',          icon:'🚜', sub:'Bagger, Walze & Co.', cls:'fach'},
-    {key:'lkw',         label:'LKW-Fahrer:in (C/CE)',        icon:'🚚', sub:'Baustellenlogistik', cls:'fach'},
-    {key:'vorarb',      label:'Vorarbeiter:in',              icon:'🧭', sub:'Kolonnenführung', cls:'vorarbeiter'},
-    {key:'polier',      label:'Polier:in',                   icon:'📐', sub:'Bau- / Werkpolier', cls:'vorarbeiter'},
-    {key:'meister',     label:'Meister:in / Techniker:in',   icon:'🏅', sub:'Meister, Techniker', cls:'meister'},
-    {key:'bauleiter',   label:'Bauleiter:in',                icon:'🏗️', sub:'Bau- & Projektleitung', cls:'bauleiter'},
-    {key:'azubi',       label:'Auszubildende:r',             icon:'🎓', sub:'Ausbildung Straßenbau / Tiefbau', cls:'azubi'},
-    {key:'helfer',      label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon im Tiefbau gearbeitet, ohne Ausbildung', cls:'helfer'},
-    {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
-  ],
 };
 function posByKey(branche,key){ return (POSITIONEN[branche]||[]).find(p=>p.key===key)||null; }
 
@@ -801,7 +787,6 @@ const SCHEINE_BY_BRANCHE = {
   pflege: ['none','b','be','ce','bagger','motorsaege'],
   baum:   ['none','b','be','ce','motorsaege','skt'],
   forst:  ['none','b','be','ce','motorsaege','forstmasch'],
-  tiefbau:['none','b','be','ce','bagger'],
 };
 /* Quereinsteiger-Filter (Feedback Dani): Woher kommt die Person beruflich?
    So erkennt das Backend sofort solide Quereinsteiger (Handwerk) vs. komplett fachfremd. */
@@ -910,7 +895,6 @@ const S = {
 /* ---------- Variante aus URL ---------- */
 const VARIANTS = {
   galabau: {branche:'galabau', tag:'🌿 Für GaLaBau-Profis',        roles:'Facharbeiter · Vorarbeiter · Meister · Bauleiter'},
-  tiefbau: {branche:'tiefbau', tag:'🚧 Für Straßen- & Tiefbau',    roles:'Facharbeiter · Vorarbeiter · Maschinisten'},
   bauleiter:{branche:'galabau', rolle:'bauleiter', tag:'🏗️ Für Bauleiter im GaLaBau', roles:'Bauleitung · Projektleitung · GaLaBau'},
 };
 (function initVariant(){
@@ -928,9 +912,6 @@ const VARIANTS = {
     if(v==='bauleiter'){
       document.getElementById('heroH1').innerHTML = 'Top-Betriebe suchen <span class="hl">Bauleiter</span> wie dich.';
       document.getElementById('heroP').textContent = 'Deutschlands größtes Karrierenetzwerk für die grüne Branche. Zwei kurze Fragen + Standort – wir stellen dich den besten GaLaBau-Betrieben deiner Region vor. Unverbindlich & diskret, austragen jederzeit möglich.';
-    } else if(v==='tiefbau'){
-      document.getElementById('heroH1').innerHTML = 'Die besten <span class="hl">Jobangebote</span> im Straßen- & Tiefbau – direkt zu dir.';
-      document.getElementById('heroRoles').textContent = cfg.roles;
     }
   }
 })();
