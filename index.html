@@ -694,9 +694,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
      ohne Param   -> generisch, Branche wird als Frage 1 gestellt
    ============================================================ */
 
-/* TODO: Neue Make-Webhook-URL für den Bewerbungs-Funnel eintragen.
-   Leer = es wird nichts gesendet (nur Konsolen-Log). */
-const LEAD_WEBHOOK = "";
+/* Make-Webhook: Szenario "Bewerbungsfunnel_..." -> Google Sheet GC-Bewerber */
+const LEAD_WEBHOOK = "https://hook.eu1.make.com/4ptxe29j72fmv2q9jv0l1ml855qt5q4l";
 
 /* ---------- Tracking (Meta Pixel + CAPI-Dedup, wie Gehalts-Check) ---------- */
 const META_STD_EVENTS = ['PageView','ViewContent','Lead','CompleteRegistration','Contact','Search','InitiateCheckout','AddToCart','Subscribe'];
@@ -1540,6 +1539,8 @@ const META_EVENT_MAP = { lead_captured:'Lead', lead_enriched:'CompleteRegistrati
 /* Sheet-freundliche Label: übersprungene Frage -> 'Frage übersprungen' statt leer */
 const SKIP_LABELS = {'s-gehalt':'Wunschgehalt','s-benefits':'Benefits','s-exp':'Berufserfahrung','s-scheine':'Führerscheine/Scheine','s-kolonne':'Kolonnenführung','s-start':'Verfügbarkeit'};
 function lbl(id,val){ return S.skipped.includes(id) ? 'Frage übersprungen' : val; }
+/* Arrays als Text senden – Google Sheets akzeptiert keine Listen in Zellen */
+const asText=v=>Array.isArray(v)?v.join(', '):v;
 
 /* Alle Fragen + Antworten als fertiger Text (Feedback Jana): landet 1:1 als
    "Nachricht des Bewerbers" im Backend – keine KI-Aufbereitung mehr nötig. */
@@ -1592,19 +1593,19 @@ function sendLead(event){
     quereinsteiger_herkunft:S.herkunft, quereinsteiger_herkunft_label:S.herkunft?HERKUNFT[S.herkunft].label:null,
     deutschkenntnisse:S.deutsch, deutschkenntnisse_label:S.deutsch?DEUTSCH[S.deutsch].label:null,
     bauleiter_erfahrung_jahre:S.blErfahrung, bauleiter_erfahrung_label:S.blErfahrung===null?null:fmtYears(S.blErfahrung),
-    bauleiter_qualifikation:S.blQuali, bauleiter_qualifikation_labels:S.blQuali.map(k=>BL_QUALI[k]?BL_QUALI[k].label:k),
+    bauleiter_qualifikation:S.blQuali, bauleiter_qualifikation_labels:asText(S.blQuali.map(k=>BL_QUALI[k]?BL_QUALI[k].label:k)),
     plz:S.plz, ort:S.ort, kreis:S.kreis, region:S.region,
     radius:S.radius, radius_label:S.radius?RADIUS[S.radius].label:null,
     /* --- Zusatzfragen (null = nicht gestellt, 'Frage übersprungen' = übersprungen) --- */
     deep_completed:S.deepDone,
-    scheine:S.scheine, scheine_labels:lbl('s-scheine', S.scheine.map(k=>SCHEINE[k]?SCHEINE[k].label:k)),
+    scheine:S.scheine, scheine_labels:asText(lbl('s-scheine', S.scheine.map(k=>SCHEINE[k]?SCHEINE[k].label:k))),
     kolonne:S.kolonne, kolonne_label:lbl('s-kolonne', S.kolonne?KOLONNE[S.kolonne].label:null),
-    schwerpunkt:S.schwerpunkt, schwerpunkt_labels:lbl('s-schwerpunkt', S.schwerpunkt.map(k=>SCHWERPUNKT[k]?SCHWERPUNKT[k].label:k)),
-    benefits:S.benefits, benefits_labels:lbl('s-benefits', S.benefits.map(k=>BENEFIT_LABELS[k]||k)),
+    schwerpunkt:S.schwerpunkt, schwerpunkt_labels:asText(lbl('s-schwerpunkt', S.schwerpunkt.map(k=>SCHWERPUNKT[k]?SCHWERPUNKT[k].label:k))),
+    benefits:S.benefits, benefits_labels:asText(lbl('s-benefits', S.benefits.map(k=>BENEFIT_LABELS[k]||k))),
     wunschgehalt:S.gehaltAnswered?S.wunschgehalt:null,
     wunschgehalt_label:lbl('s-gehalt', S.gehaltAnswered?S.wunschgehalt.toLocaleString('de-DE')+' € / Monat':null),
     verfuegbarkeit:S.start, verfuegbarkeit_label:lbl('s-start', S.start?START[S.start].label:null),
-    uebersprungene_fragen:S.skipped.map(id=>SKIP_LABELS[id]||id),
+    uebersprungene_fragen:asText(S.skipped.map(id=>SKIP_LABELS[id]||id)),
     bemerkung:S.note||null,
     bewerber_nachricht:buildNachricht(),
     /* --- Herkunft + Consent (revisionssicher) --- */
