@@ -153,7 +153,15 @@ body{
 .btn-primary{background:linear-gradient(135deg,var(--green-500),var(--green-700));color:#fff;box-shadow:0 12px 30px rgba(28,131,76,.4)}
 .btn-primary:hover{filter:brightness(1.04)}
 .btn-lime{background:linear-gradient(135deg,var(--lime),#7ec614);color:var(--green-900);box-shadow:0 12px 30px rgba(126,198,20,.4)}
-.btn-ghost{background:transparent;color:var(--ink-soft);font-weight:600;font-size:14px;padding:12px}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);border-radius:999px;color:var(--ink);font-weight:700;font-size:14px;padding:11px 18px}
+.topback{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(16,20,25,.06);transition:transform .12s}
+.topback:active{transform:scale(.94)}
+/* CTA-Puls + Glanz-Durchlauf (Feedback Jana) */
+.cta-hero{animation:ctaPulse 2.4s ease-in-out infinite;overflow:hidden}
+.cta-hero::after{content:"";position:absolute;top:0;left:-80%;width:55%;height:100%;background:linear-gradient(115deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-20deg);animation:ctaShine 3s ease-in-out infinite}
+@keyframes ctaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+@keyframes ctaShine{0%{left:-80%}55%{left:130%}100%{left:130%}}
+@media (prefers-reduced-motion:reduce){.cta-hero{animation:none}.cta-hero::after{animation:none;display:none}}
 .btn-outline{background:#fff;color:var(--green-700);border:1.5px solid var(--line);box-shadow:0 4px 14px rgba(11,61,36,.06);font-size:15px}
 .btn .arrow{transition:transform .2s}
 .btn:hover .arrow{transform:translateX(3px)}
@@ -281,7 +289,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       </div>
       <div class="body">
         <h1 id="heroH1">Die besten <span class="hl">Jobangebote</span> der grünen Branche – direkt zu dir.</h1>
-        <button class="btn btn-lime" onclick="start()" style="position:relative;margin-bottom:18px">Jetzt Top-Jobangebote erhalten <span class="arrow">→</span></button>
+        <button class="btn btn-lime cta-hero" onclick="start()" style="position:relative;margin-bottom:18px">Jetzt Top-Jobangebote erhalten <span class="arrow">→</span></button>
         <p id="heroP">Deutschlands größtes Karrierenetzwerk für die grüne Branche. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern in deiner Region vor. Die melden sich direkt bei dir. Unverbindlich &amp; kostenlos, austragen jederzeit möglich.</p>
         <div class="stats" style="margin-bottom:0">
           <div class="stat"><b>2 Min.</b><span>bis zur Bewerbung</span></div>
@@ -961,6 +969,25 @@ const PROGRESS = {
   's-gehalt':70, 's-benefits':76, 's-exp':81, 's-scheine':86, 's-kolonne':90, 's-schwerpunkt':86, 's-start':93,
   's-gate':96, 's-done':100, 's-done2':100,
 };
+/* Browser-Zurück & Wisch-Geste bleiben im Funnel statt rauszuwerfen (Feedback Jana) */
+let NAV_POP=false;
+history.replaceState({screen:'s-hero'},'');
+window.addEventListener('popstate',e=>{
+  const s=e.state&&e.state.screen;
+  if(s&&document.getElementById(s)){ NAV_POP=true; go(s); NAV_POP=false; }
+});
+
+/* Zurück-Pfeil zusätzlich oben an jedem Frage-Screen (Feedback Jana) */
+document.querySelectorAll('section.screen').forEach(sec=>{
+  if(sec.id==='s-hero'||sec.id==='s-done'||sec.id==='s-done2') return;
+  const backBtn=[...sec.querySelectorAll('.backlink .btn-ghost')].find(b=>b.textContent.trim().startsWith('←'));
+  if(!backBtn) return;
+  const top=document.createElement('button');
+  top.type='button'; top.className='topback'; top.textContent='←'; top.setAttribute('aria-label','Zurück');
+  top.onclick=()=>backBtn.click();
+  sec.insertBefore(top,sec.firstChild);
+});
+
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -969,6 +996,7 @@ function go(id){
   if(pct){ prog.classList.add('show'); document.getElementById('progBar').style.width=pct+'%'; }
   else prog.classList.remove('show');
   window.scrollTo({top:0,behavior:'smooth'});
+  if(!NAV_POP) history.pushState({screen:id},'');
   track('funnel_step',{step:id, variant:S.variant||'default'});
 }
 
