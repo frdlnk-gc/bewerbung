@@ -696,6 +696,19 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 
 /* Make-Webhook: Szenario "Bewerbungsfunnel_..." -> Google Sheet GC-Bewerber */
 const LEAD_WEBHOOK = "https://hook.eu1.make.com/4ptxe29j72fmv2q9jv0l1ml855qt5q4l";
+/* Meta-Ad-Attribution aus der Anzeigen-URL. Meta hängt ad_id/adset_id/
+   campaign_id (+ Namen) an, sobald sie als URL-Parameter der Ads gesetzt sind.
+   Einmal beim Seitenaufruf lesen — bleibt, auch wenn der Funnel clientseitig
+   weiterblättert. Fehlt ein Parameter (organisch/direkt), bleibt er null. */
+const AD_P = new URLSearchParams(location.search);
+const AD_TRACKING = {
+  ad_id: AD_P.get('ad_id') || null,
+  adset_id: AD_P.get('adset_id') || null,
+  campaign_id: AD_P.get('campaign_id') || null,
+  ad_name: AD_P.get('ad_name') || null,
+  adset_name: AD_P.get('adset_name') || null,
+  campaign_name: AD_P.get('campaign_name') || null,
+};
 
 /* ---------- Tracking (Meta Pixel + CAPI-Dedup, wie Gehalts-Check) ---------- */
 const META_STD_EVENTS = ['PageView','ViewContent','Lead','CompleteRegistration','Contact','Search','InitiateCheckout','AddToCart','Subscribe'];
@@ -1608,6 +1621,8 @@ function sendLead(event){
     uebersprungene_fragen:asText(S.skipped.map(id=>SKIP_LABELS[id]||id)),
     bemerkung:S.note||null,
     bewerber_nachricht:buildNachricht(),
+    /* --- Meta-Ad-Attribution (Kampagne/Anzeigengruppe/Creative-Analyse) --- */
+    ...AD_TRACKING,
     /* --- Herkunft + Consent (revisionssicher) --- */
     source:'bewerbungsfunnel',
     consent_version:CONSENT_VERSION,
