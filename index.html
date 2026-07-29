@@ -744,7 +744,7 @@ const BRANCHEN = {
      bauleiter           -> 2 Auswahl-Fragen (Erfahrung + Qualifikation) statt Ausbildung
      azubi               -> keine Ausbildungs-Frage, verkürzte Zusatzfragen */
 /* Reihenfolge: qualifizierte Positionen zuerst, Helfer & Quereinsteiger bewusst getrennt
-   und am Ende – so labelt sich niemand versehentlich als Facharbeiter (Feedback Dani). */
+   und am Ende – so labelt sich niemand versehentlich als Facharbeiter (Feedback Danny). */
 const POSITIONEN = {
   galabau:[
     {key:'geselle',   label:'Landschaftsgärtner:in',      icon:'🌱', sub:'Geselle / Facharbeiter', cls:'fach'},
@@ -823,7 +823,7 @@ const SCHEINE_BY_BRANCHE = {
   forst:  ['none','b','be','ce','motorsaege','forstmasch'],
   tiefbau:['none','b','be','ce','bagger'],
 };
-/* Quereinsteiger-Filter (Feedback Dani): Woher kommt die Person beruflich?
+/* Quereinsteiger-Filter (Feedback Danny): Woher kommt die Person beruflich?
    So erkennt das Backend sofort solide Quereinsteiger (Handwerk) vs. komplett fachfremd. */
 const HERKUNFT = {
   handwerk:      {label:'Bau / anderes Handwerk',      icon:'🔨', sub:'z. B. Hochbau, Zimmerei, Metall, Elektro'},
@@ -1321,7 +1321,7 @@ function afterStandort(){ updateUpsellCount(); go('s-upsell'); }
 function deepPath(){
   const cls=S.rolleClass;
   if(cls==='azubi') return ['s-benefits','s-scheine','s-start'];
-  /* Schwerpunkt-Frage vorerst raus (Feedback Dani: wird eh in allen Bereichen beworben,
+  /* Schwerpunkt-Frage vorerst raus (Feedback Danny: wird eh in allen Bereichen beworben,
      kommt erst in einem späteren Meilenstein) – Screen bleibt für später im Code. */
   if(cls==='bauleiter') return ['s-gehalt','s-benefits','s-start'];
   if(cls==='quereinsteiger') return ['s-gehalt','s-benefits','s-scheine','s-start'];
