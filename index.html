@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" type="image/png" href="https://gehaltscheck.green-careers.de/favicon.png">
 <title>Die besten Jobs der grünen Branche – Top-Arbeitgeber melden sich bei dir | GreenCareers</title>
-<meta name="description" content="Deutschlands größtes Karrierenetzwerk für GaLaBau, Grünpflege, Baumpflege, Forst & Tiefbau. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern deiner Region vor. Kostenlos, unverbindlich, jederzeit austragbar.">
+<meta name="description" content="Deutschlands größtes Karrierenetzwerk für GaLaBau, Grünpflege, Baumschule, Gärtnerei, Gartencenter, Friedhofsgärtnerei, Baumpflege, Forst & Tiefbau. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern deiner Region vor. Kostenlos, unverbindlich, jederzeit austragbar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -285,7 +285,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="hero">
       <div class="photo">
         <span class="ftag" id="heroTag">🌿 Für die grüne Branche</span>
-        <div class="roles" id="heroRoles">GaLaBau · Grünpflege · Baumpflege · Forstwirtschaft</div>
+        <div class="roles" id="heroRoles">GaLaBau · Grünpflege · Baumschule · Gärtnerei · Gartencenter · Baumpflege · Forst</div>
       </div>
       <div class="body">
         <h1 id="heroH1">Die besten <span class="hl">Jobangebote</span> der grünen Branche – direkt zu dir.</h1>
@@ -691,6 +691,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
      ?v=galabau   -> GaLaBau FA+VA        (Branche vorbelegt)
      ?v=tiefbau   -> Straßen-/Tiefbau     (Branche vorbelegt)
      ?v=bauleiter -> GaLaBau Bauleiter    (Branche+Rolle vorbelegt, 2 Freitextfragen)
+     ?v=baumschule / gaertnerei / gartencenter / friedhof
+                  -> Gärtner-Bereiche     (Branche vorbelegt, Erweiterung 2026-08)
      ohne Param   -> generisch, Branche wird als Frage 1 gestellt
    ============================================================ */
 
@@ -735,6 +737,13 @@ const BRANCHEN = {
   baum:   {label:'Baumpflege / Baumklettern',icon:'🌳', sub:'Seilklettertechnik, Fällung', short:'Baumpflege', inPhrase:'in der Baumpflege (oder artverwandt)',   inShort:'in der Baumpflege'},
   forst:  {label:'Forst & Wald',             icon:'🪵', sub:'Forstwirtschaft, Holzernte', short:'Forst',      inPhrase:'im Forst (oder artverwandt)',            inShort:'im Forst'},
   tiefbau:{label:'Straßen- & Tiefbau',       icon:'🚧', sub:'Straßenbau, Kanalbau, Pflaster', short:'Tiefbau', inPhrase:'im Straßen-/Tiefbau (oder artverwandt)', inShort:'im Straßen-/Tiefbau'},
+  /* Erweiterung 2026-08: alle Bereiche, in denen die 7 Gärtner-Ausbildungen arbeiten
+     (Baumschule, Stauden, Zierpflanzen, Gemüse, Obst, Friedhof) + Gartencenter/Handel.
+     Labels so gewählt, dass BRANCHE_PATTERNS im Dashboard-Pool sie sauber mappt. */
+  baumschule:  {label:'Baumschule & Stauden',          icon:'🪴', sub:'Gehölze, Stauden, Vermehrung', short:'Baumschule',   inPhrase:'in der Baumschule (oder artverwandt)',    inShort:'in der Baumschule'},
+  gaertnerei:  {label:'Gärtnerei & Gewächshaus',       icon:'🌷', sub:'Zierpflanzen, Gemüse, Obst', short:'Gärtnerei',      inPhrase:'im Gartenbau (oder artverwandt)',         inShort:'im Gartenbau'},
+  gartencenter:{label:'Gartencenter & Pflanzenhandel', icon:'🛒', sub:'Verkauf, Beratung, Pflanzenpflege', short:'Gartencenter', inPhrase:'im Gartencenter / Pflanzenhandel (oder artverwandt)', inShort:'im Pflanzenhandel'},
+  friedhof:    {label:'Friedhofsgärtnerei',            icon:'🌸', sub:'Grabpflege, Bepflanzung, Trauerbinderei', short:'Friedhofsgärtnerei', inPhrase:'in der Friedhofsgärtnerei (oder artverwandt)', inShort:'in der Friedhofsgärtnerei'},
 };
 
 /* ---------- Positionen je Branche (Stellenbezeichnungen wie im Gehalts-Check) ----------
@@ -801,6 +810,49 @@ const POSITIONEN = {
     {key:'helfer',      label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon im Tiefbau gearbeitet, ohne Ausbildung', cls:'helfer'},
     {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
   ],
+  baumschule:[
+    {key:'geselle',   label:'Baumschulgärtner:in',           icon:'🌳', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'stauden',   label:'Staudengärtner:in',             icon:'🪴', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'maschinen', label:'Maschinenführer:in / Schlepperfahrer:in', icon:'🚜', sub:'Rode-, Pflanz- & Verladetechnik', cls:'fach'},
+    {key:'vorarb',    label:'Vorarbeiter:in / Kulturführer:in', icon:'🧭', sub:'Teamführung Quartier & Container', cls:'vorarbeiter'},
+    {key:'meister',   label:'Gärtnermeister:in Baumschule',  icon:'🏅', sub:'Meister / Techniker', cls:'meister'},
+    {key:'leitung',   label:'Betriebsleiter:in / Kulturleiter:in', icon:'📐', sub:'Produktions- & Betriebsleitung', cls:'bauleiter'},
+    {key:'azubi',     label:'Auszubildende:r',               icon:'🎓', sub:'Ausbildung Gärtner:in Baumschule', cls:'azubi'},
+    {key:'helfer',    label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon in der Baumschule gearbeitet, ohne Ausbildung', cls:'helfer'},
+    {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
+  ],
+  gaertnerei:[
+    {key:'zier',      label:'Zierpflanzengärtner:in',        icon:'🌷', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'gemuese',   label:'Gemüsegärtner:in',              icon:'🥬', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'obst',      label:'Gärtner:in Obstbau',            icon:'🍎', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'maschinen', label:'Maschinen- & Geräteführer:in',  icon:'🚜', sub:'Schlepper, Pflanz- & Erntetechnik', cls:'fach'},
+    {key:'vorarb',    label:'Vorarbeiter:in / Kulturführer:in', icon:'🧭', sub:'Teamführung Gewächshaus & Freiland', cls:'vorarbeiter'},
+    {key:'meister',   label:'Gärtnermeister:in',             icon:'🏅', sub:'Meister / Techniker', cls:'meister'},
+    {key:'leitung',   label:'Betriebsleiter:in / Kulturleiter:in', icon:'📐', sub:'Produktionsleitung', cls:'bauleiter'},
+    {key:'azubi',     label:'Auszubildende:r',               icon:'🎓', sub:'Ausbildung Gärtner:in – Zierpflanzen, Gemüse oder Obst', cls:'azubi'},
+    {key:'helfer',    label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon in der Gärtnerei gearbeitet, ohne Ausbildung', cls:'helfer'},
+    {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
+  ],
+  gartencenter:[
+    {key:'gaertner',  label:'Gärtner:in im Verkauf',         icon:'🌺', sub:'Pflanzenpflege & Fachberatung', cls:'fach'},
+    {key:'verkauf',   label:'Verkäufer:in im Gartencenter',  icon:'🛒', sub:'Einzelhandel, Kasse, Beratung', cls:'fach'},
+    {key:'florist',   label:'Florist:in',                    icon:'💐', sub:'Binderei & Dekoration', cls:'fach'},
+    {key:'teamleiter',label:'Abteilungs- / Teamleiter:in',   icon:'🧭', sub:'Pflanzenabteilung, Grüner Markt', cls:'vorarbeiter'},
+    {key:'meister',   label:'Gärtnermeister:in',             icon:'🏅', sub:'Meister im Gartencenter', cls:'meister'},
+    {key:'leitung',   label:'Marktleiter:in / Centerleiter:in', icon:'📐', sub:'Standortleitung', cls:'bauleiter'},
+    {key:'azubi',     label:'Auszubildende:r',               icon:'🎓', sub:'Ausbildung Gärtner:in oder Einzelhandel', cls:'azubi'},
+    {key:'helfer',    label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon im Gartencenter gearbeitet, ohne Ausbildung', cls:'helfer'},
+    {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
+  ],
+  friedhof:[
+    {key:'gaertner',  label:'Friedhofsgärtner:in',           icon:'🌸', sub:'Geselle / Facharbeiter', cls:'fach'},
+    {key:'florist',   label:'Florist:in / Trauerbinder:in',  icon:'💐', sub:'Binderei & Dekoration', cls:'fach'},
+    {key:'vorarb',    label:'Vorarbeiter:in / Kolonnenführer:in', icon:'🧭', sub:'Teamführung Grabpflege', cls:'vorarbeiter'},
+    {key:'meister',   label:'Gärtnermeister:in',             icon:'🏅', sub:'Meister Friedhofsgärtnerei', cls:'meister'},
+    {key:'azubi',     label:'Auszubildende:r',               icon:'🎓', sub:'Ausbildung Friedhofsgärtner:in', cls:'azubi'},
+    {key:'helfer',    label:'Helfer:in mit Branchenerfahrung', icon:'🔰', sub:'Schon in der Friedhofsgärtnerei gearbeitet, ohne Ausbildung', cls:'helfer'},
+    {key:'quereinsteiger', label:'Quereinsteiger:in',        icon:'🚪', sub:'Neu in der Branche', cls:'quereinsteiger'},
+  ],
 };
 function posByKey(branche,key){ return (POSITIONEN[branche]||[]).find(p=>p.key===key)||null; }
 
@@ -815,6 +867,8 @@ const SCHEINE = {
   motorsaege:{label:'Motorsägenschein'},
   skt:      {label:'SKT A / B (Klettern)'},
   forstmasch:{label:'Forstmaschine (Harvester/Forwarder)'},
+  stapler:  {label:'Staplerschein'},
+  pflanzenschutz:{label:'Pflanzenschutz-Sachkunde'},
 };
 const SCHEINE_BY_BRANCHE = {
   galabau:['none','b','be','ce','bagger','motorsaege'],
@@ -822,6 +876,10 @@ const SCHEINE_BY_BRANCHE = {
   baum:   ['none','b','be','ce','motorsaege','skt'],
   forst:  ['none','b','be','ce','motorsaege','forstmasch'],
   tiefbau:['none','b','be','ce','bagger'],
+  baumschule:  ['none','b','be','ce','stapler','pflanzenschutz'],
+  gaertnerei:  ['none','b','be','ce','stapler','pflanzenschutz'],
+  gartencenter:['none','b','be','stapler','pflanzenschutz'],
+  friedhof:    ['none','b','be','motorsaege','pflanzenschutz'],
 };
 /* Quereinsteiger-Filter (Feedback Danny): Woher kommt die Person beruflich?
    So erkennt das Backend sofort solide Quereinsteiger (Handwerk) vs. komplett fachfremd. */
@@ -932,6 +990,11 @@ const VARIANTS = {
   galabau: {branche:'galabau', tag:'🌿 Für GaLaBau-Profis',        roles:'Facharbeiter · Vorarbeiter · Meister · Bauleiter'},
   tiefbau: {branche:'tiefbau', tag:'🚧 Für Straßen- & Tiefbau',    roles:'Facharbeiter · Vorarbeiter · Maschinisten'},
   bauleiter:{branche:'galabau', rolle:'bauleiter', tag:'🏗️ Für Bauleiter im GaLaBau', roles:'Bauleitung · Projektleitung · GaLaBau'},
+  /* Gärtner-Bereiche (Erweiterung 2026-08) — für eigene Ad-Gruppen */
+  baumschule:  {branche:'baumschule',   tag:'🪴 Für Baumschule & Stauden',      roles:'Baumschulgärtner · Staudengärtner · Vorarbeiter'},
+  gaertnerei:  {branche:'gaertnerei',   tag:'🌷 Für Gärtner:innen',             roles:'Zierpflanzen · Gemüse · Obstbau'},
+  gartencenter:{branche:'gartencenter', tag:'🛒 Für Gartencenter-Profis',       roles:'Verkauf · Beratung · Floristik'},
+  friedhof:    {branche:'friedhof',     tag:'🌸 Für Friedhofsgärtner:innen',    roles:'Grabpflege · Floristik · Teamführung'},
 };
 (function initVariant(){
   const v = new URLSearchParams(location.search).get('v');
