@@ -726,6 +726,43 @@ function track(name, custom={}, eventId){
   return eventId;
 }
 
+/* ---------- 1st-Party Funnel-Tracking (GC-Dashboard, quiz_funnel_events) ----------
+   Gleicher Vertrag wie Beratungs-/Report-LPs: lp_view beim Laden, slide_view je
+   Screen-Wechsel (go()), submit_success beim Absenden. Damit wird der Drop-Off
+   pro Seite im Dashboard unter Bewerber-Marketing → LP-Funnel sichtbar.
+   Nur live auf *.green-careers.de aktiv. */
+const GC_FUNNEL_LP_ID = 'bewerbung';
+const GC_FUNNEL_ENDPOINT = 'https://gc-tracking-dashboard.vercel.app/api/recruiting/funnel-event';
+const GC_FUNNEL_LIVE = /(^|\.)green-careers\.de$/.test(location.hostname);
+function gcUuid(){
+  if(window.crypto&&crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16);});
+}
+const GC_FUNNEL_SESSION = (function(){
+  try{ let s=sessionStorage.getItem('gc_session_id'); if(!s){ s=gcUuid(); sessionStorage.setItem('gc_session_id',s); } return s; }
+  catch(e){ return gcUuid(); }
+})();
+const GC_FUNNEL_UTM = (function(){
+  const out={};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'].forEach(k=>{ const v=AD_P.get(k); if(v) out[k]=v; });
+  /* Meta-Ads hängen ad_id/campaign_name statt utm_* an – als Fallback mappen,
+     damit die UTM-Filter im Dashboard-Funnel greifen */
+  if(!out.utm_source&&(AD_TRACKING.ad_id||out.fbclid)) out.utm_source='meta';
+  if(!out.utm_campaign&&AD_TRACKING.campaign_name) out.utm_campaign=AD_TRACKING.campaign_name;
+  if(!out.utm_content&&AD_TRACKING.ad_name) out.utm_content=AD_TRACKING.ad_name;
+  return out;
+})();
+function gcFunnelTrack(eventType, slideId){
+  const body=Object.assign({
+    event_type:eventType, slide_id:slideId, landingpage_id:GC_FUNNEL_LP_ID,
+    session_id:GC_FUNNEL_SESSION, referrer:document.referrer||'',
+    page_url:location.href, user_agent:navigator.userAgent
+  }, GC_FUNNEL_UTM);
+  if(!GC_FUNNEL_LIVE){ if(window.TRACK_DEBUG) console.log('[FUNNEL]', eventType, slideId||''); return; }
+  try{ fetch(GC_FUNNEL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true,credentials:'omit'}).catch(()=>{}); }catch(e){}
+}
+gcFunnelTrack('lp_view', null);
+
 /* ---------- Consent-Texte (revisionssicher, Version bei Textänderung hochzählen) ---------- */
 const CONSENT_VERSION = 'bewerbung-2026-07-v1';
 const CONSENT_SHARE_TEXT = 'Ja, GreenCareers darf meine Angaben an passende Partnerbetriebe der grünen Branche weitergeben. Diese dürfen mich zu passenden Stellenangeboten per Telefon, WhatsApp und E-Mail kontaktieren. Freiwillig, jederzeit mit Wirkung für die Zukunft widerrufbar.';
@@ -1073,6 +1110,7 @@ function go(id){
   window.scrollTo({top:0,behavior:'smooth'});
   if(!NAV_POP) history.pushState({screen:id},'');
   track('funnel_step',{step:id, variant:S.variant||'default'});
+  if(id!=='s-hero') gcFunnelTrack('slide_view', id);
 }
 
 /* Basis-Fragen dynamisch nummerieren (Varianten überspringen Screens) */
@@ -1597,6 +1635,7 @@ function submitGate(){
   if(msg){ err.textContent=msg; err.style.display='block'; return; }
   err.style.display='none';
   S.submitted=true;
+  gcFunnelTrack('submit_success', null);
   sendLead('lead_captured');
   document.getElementById('doneTitle').textContent='Top, '+S.firstName+'! 🌱';
   document.getElementById('enrichBox').style.display = S.deepDone ? 'none' : 'block';
