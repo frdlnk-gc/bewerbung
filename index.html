@@ -111,6 +111,31 @@ body{
 .hero .stat{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:11px 6px;text-align:center}
 .hero .stat b{display:block;font-size:17px;font-weight:800;color:var(--lime)}
 .hero .stat span{font-size:10.5px;color:rgba(255,255,255,.82);line-height:1.25;display:block;margin-top:2px}
+/* ---------- Hero: Frage 1 als Kachel-Auswahl (kein Leerklick-CTA mehr) ---------- */
+.hero-q-title{position:relative;font-size:16px;font-weight:800;color:var(--lime);letter-spacing:.01em;margin-bottom:10px}
+.hero-tiles{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.hero-tiles.single{grid-template-columns:1fr}
+.hero-tile{display:flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.24);background:rgba(255,255,255,.10);border-radius:13px;padding:10px 11px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;color:#fff;text-align:left;line-height:1.2;transition:background .15s,border-color .15s,transform .12s;min-height:44px}
+.hero-tile:hover{background:rgba(255,255,255,.18);border-color:var(--lime)}
+.hero-tile:active{transform:scale(.97)}
+.hero-tile .tic{font-size:18px;flex:none}
+.hero-tile.sel{background:var(--lime);color:var(--green-900);border-color:var(--lime)}
+/* 9. Kachel (ungerade) über volle Breite */
+.hero-tiles:not(.single) .hero-tile:last-child:nth-child(odd){grid-column:1/-1}
+/* Mobile: Foto wird schmaler Streifen, damit Headline+Subline+Kacheln ohne Scrollen passen
+   (Abstimmung Freddy 11.08.; Trust-Stats rutschen unter den Fold, bleiben aber drin) */
+@media (max-width:700px){
+  .hero .photo{height:64px}
+  .hero .photo .roles{display:none}
+  .hero .photo .ftag{top:50%;transform:translateY(-50%)}
+  .hero .body{padding:14px 14px 16px}
+  .hero h1{font-size:21px;margin-bottom:8px}
+  .hero p{font-size:12.5px;margin-bottom:12px}
+  .hero-q-title{font-size:14.5px;margin-bottom:8px}
+  .hero-tile{min-height:40px;padding:8px 9px;font-size:12.5px}
+  .hero-tile .tic{font-size:16px}
+  .hero-tiles{gap:7px;margin-bottom:14px}
+}
 .trustrow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:18px;color:var(--ink-soft);font-size:12.5px;font-weight:500}
 .trustrow span{display:flex;align-items:center;gap:5px}
 
@@ -289,8 +314,10 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       </div>
       <div class="body">
         <h1 id="heroH1">Die besten <span class="hl">Jobangebote</span> der grünen Branche – direkt zu dir.</h1>
-        <button class="btn btn-lime cta-hero" onclick="start()" style="position:relative;margin-bottom:18px">Jetzt Top-Jobangebote erhalten <span class="arrow">→</span></button>
-        <p id="heroP">Deutschlands größtes Karrierenetzwerk für die grüne Branche. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern in deiner Region vor. Die melden sich direkt bei dir. Unverbindlich &amp; kostenlos, austragen jederzeit möglich.</p>
+        <p id="heroP" style="margin-bottom:14px">Deutschlands größtes Karrierenetzwerk für die grüne Branche. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern in deiner Region vor. Die melden sich direkt bei dir. Unverbindlich &amp; kostenlos, austragen jederzeit möglich.</p>
+        <!-- Frage 1 direkt im Hero: Klick startet den Funnel UND beantwortet die Frage -->
+        <div class="hero-q-title" id="heroQTitle">In welchem Bereich arbeitest du?</div>
+        <div class="hero-tiles" id="heroTiles"></div>
         <div class="stats" style="margin-bottom:0">
           <div class="stat"><b>2 Min.</b><span>bis zur Bewerbung</span></div>
           <div class="stat"><b>500+</b><span>Partnerbetriebe</span></div>
@@ -409,13 +436,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   </section>
 
   <!-- ============ Q: BRANCHE ============ -->
-  <section class="screen" id="s-branche">
-    <div class="q-step" data-qstep></div>
-    <div class="q-title">Wo bist du zuhause?</div>
-    <div class="q-sub">Wähle den Bereich, in dem du arbeitest oder arbeiten willst.</div>
-    <div class="options" id="brancheOpts"></div>
-    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-hero')">← Zurück</button></div>
-  </section>
+  <!-- Frage 1 (Branche) lebt jetzt direkt im Hero (heroTiles) – kein eigener Screen mehr. -->>
 
   <!-- ============ Q: ROLLE (Weiche) ============ -->
   <section class="screen" id="s-rolle">
@@ -435,7 +456,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       <button class="chip" onclick="setAusbildung(true,this)">Ja</button>
       <button class="chip" onclick="setAusbildung(false,this)">Nein</button>
     </div>
-    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-rolle')">← Zurück</button></div>
+    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-teilb')">← Zurück</button></div>
   </section>
 
   <!-- ============ Q: BERUFSERFAHRUNG (Regler, mehrfach genutzt) ============
@@ -462,7 +483,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="q-title">Aus welchem Bereich kommst du?</div>
     <div class="q-sub">Damit wir wissen, was du schon mitbringst.</div>
     <div class="options" id="herkunftOpts"></div>
-    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-rolle')">← Zurück</button></div>
+    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-teilb')">← Zurück</button></div>
   </section>
 
   <!-- ============ Q: DEUTSCHKENNTNISSE (nur Quereinsteiger) ============ -->
@@ -481,7 +502,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="q-sub">Mehrfachauswahl möglich.</div>
     <div class="chips" id="blQualiChips"></div>
     <div style="margin-top:20px">
-      <button class="btn btn-primary" id="bl2Btn" onclick="go('s-standort')" disabled>Weiter <span class="arrow">→</span></button>
+      <button class="btn btn-primary" id="bl2Btn" onclick="bl2Next()" disabled>Weiter <span class="arrow">→</span></button>
     </div>
     <div class="backlink"><button class="btn btn-ghost" onclick="showExp('bl')">← Zurück</button></div>
   </section>
@@ -504,24 +525,19 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="backlink"><button class="btn btn-ghost" onclick="goBackFromStandort()">← Zurück</button></div>
   </section>
 
-  <!-- ============ WEICHE: ABSCHICKEN ODER ZUSATZFRAGEN ============ -->
-  <section class="screen" id="s-upsell">
-    <div class="q-step">Letzter Schritt vor dem Abschicken</div>
-    <div class="q-title">Wie möchtest du deine Bewerbung abschicken?</div>
-    <div class="q-sub">Noch ist nichts abgeschickt – wähle einen der beiden Wege:</div>
-    <div class="options">
-      <button class="opt" onclick="startDeep(false)">
-        <span class="ico">🎯</span>
-        <span class="meta"><b>Mit <span id="upsellCount">4 Zusatzfragen</span> abschicken</b> <span class="reco">Empfohlen</span><small>Ca. 30 Sek. – u. a. dein Wunschgehalt. Betriebe machen dir gezieltere &amp; bessere Angebote.</small></span>
-        <span class="check">→</span>
-      </button>
-      <button class="opt" onclick="skipDeep()">
-        <span class="ico">📤</span>
-        <span class="meta"><b>Direkt abschicken</b><small>Nur noch Kontaktdaten eingeben – fertig.</small></span>
-        <span class="check">→</span>
-      </button>
+  <!-- ============ TEIL B: INTRO (Lead ist gesichert, Profil vervollständigen) ============ -->
+  <section class="screen" id="s-teilb">
+    <div class="card done" style="padding:26px 20px 20px">
+      <div class="big">✅</div>
+      <h2 id="teilbTitle">Top – deine Bewerbung ist gesichert!</h2>
+      <p>Wir suchen jetzt passende Betriebe in deiner Region – die melden sich direkt bei dir.</p>
     </div>
-    <div class="backlink"><button class="btn btn-ghost" onclick="go('s-standort')">← Zurück</button></div>
+    <div class="enrich-box">
+      <div class="mh">Profil vervollständigen 🎯</div>
+      <div class="mp">Noch ein paar Angaben – damit wir dir nur Betriebe schicken, die wirklich passen. Dauert 90 Sekunden.</div>
+      <button class="btn btn-lime" onclick="startTeilB()">Profil vervollständigen <span class="arrow">→</span></button>
+      <div class="backlink" style="margin-top:8px"><button class="btn btn-ghost" onclick="go('s-done')">Das reicht erstmal</button></div>
+    </div>
   </section>
 
   <!-- ============ ZUSATZ: BENEFITS ============ -->
@@ -600,8 +616,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <!-- ============ KONTAKT ============ -->
   <section class="screen" id="s-gate">
     <div class="card">
-      <div class="q-title" style="margin-bottom:6px">Fast geschafft! 🌱</div>
-      <div class="q-sub">Sag uns, wie dich die Betriebe erreichen können – dann geht deine Bewerbung raus.</div>
+      <div class="q-title" style="margin-bottom:6px">Wir suchen jetzt passende Betriebe in deiner Nähe. 🌱</div>
+      <div class="q-sub">Wohin sollen wir deine Treffer schicken?</div>
 
       <div class="summary" id="gateSummary"></div>
 
@@ -657,11 +673,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       <p style="font-size:13px;margin-top:14px">Kleiner Tipp: <b>Geh auch ran, wenn dich eine unbekannte Nummer anruft</b> – das sind dann die passenden Betriebe, die dich erreichen wollen.</p>
     </div>
 
-    <!-- Nachträgliche Zusatzfragen (nur wenn übersprungen) -->
-    <div class="enrich-box" id="enrichBox" style="display:none">
-      <div class="mh">Noch bessere Angebote? 🎯</div>
-      <div class="mp">Beantworte jetzt noch <b id="enrichCount">4 kurze Zusatzfragen</b> (30 Sek.) – dann können Betriebe dir gezieltere Angebote machen.</div>
-      <button class="btn btn-lime" onclick="startDeep(true)">Zusatzfragen beantworten <span class="arrow">→</span></button>
+    <!-- Zusatzfragen-Angebot: Wer hier landet, hat Teil B bewusst übersprungen –
+         ein sanfter zweiter Anlauf ohne Druck. -->
+    <div class="enrich-box" id="enrichBox">
+      <div class="mh">Doch noch kurz Zeit? 🎯</div>
+      <div class="mp">Vervollständige dein Profil in 90 Sekunden – dann schicken wir dir nur Betriebe, die wirklich passen.</div>
+      <button class="btn btn-lime" onclick="startTeilB()">Profil vervollständigen <span class="arrow">→</span></button>
     </div>
   </section>
 
@@ -684,10 +701,16 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <script>
 /* ============================================================
    BEWERBUNGS-FUNNEL GRÜNE BRANCHE (GreenCareers)
-   Kurzer Basis-Funnel (3 Fragen + Standort + Kontakt) mit
-   optionalen Zusatzfragen für bessere Matches.
-   Struktur & Design 1:1 vom Gehalts-Check übernommen.
-   Fragenlogik nach Jana (3 Ad-Gruppen):
+   Struktur seit Umbau 2026-08 (Conversion-Hebel, Freigabe Freddy):
+     TEIL A (Pflicht, Lead wird gesichert):
+       1. Branche  – als Kacheln DIREKT im Hero (kein Leerklick-CTA)
+       2. Position 3. Standort+Radius 4. Kontakt -> sendLead('lead_captured')
+     TEIL B ("Profil vervollständigen", nach der Lead-Sicherung):
+       Quali-Fragen je Rolle (Ausbildung/Erfahrung/Quereinstieg/Deutsch/
+       Leitungs-Quali) + übrige Fragen (deepPath)
+       -> sendLead('profile_completed')  [hieß früher lead_enriched]
+   Abbruch in Teil B: Lead aus Teil A bleibt bestehen (deep_completed=false).
+   Fragenlogik nach Jana (Ad-Gruppen):
      ?v=galabau   -> GaLaBau FA+VA        (Branche vorbelegt)
      ?v=tiefbau   -> Straßen-/Tiefbau     (Branche vorbelegt)
      ?v=bauleiter -> GaLaBau Bauleiter    (Branche+Rolle vorbelegt, 2 Freitextfragen)
@@ -740,6 +763,13 @@ function gcUuid(){
 }
 const GC_FUNNEL_SESSION = (function(){
   try{ let s=sessionStorage.getItem('gc_session_id'); if(!s){ s=gcUuid(); sessionStorage.setItem('gc_session_id',s); } return s; }
+  catch(e){ return gcUuid(); }
+})();
+/* lead_id: EIN Schlüssel pro Bewerbungs-Durchlauf. Make upsertet damit ins Sheet
+   (Search Rows -> Update/Add) — jeder Teil-B-Schritt aktualisiert DIESELBE Zeile.
+   sessionStorage überlebt Reloads im selben Tab; neuer Tab = neuer Lead. */
+const LEAD_ID=(function(){
+  try{ let id=sessionStorage.getItem('gc_lead_id'); if(!id){ id=gcUuid(); sessionStorage.setItem('gc_lead_id',id); } return id; }
   catch(e){ return gcUuid(); }
 })();
 const GC_FUNNEL_UTM = (function(){
@@ -1018,7 +1048,8 @@ const S = {
   plz:'', ort:null, kreis:null, region:null, radius:null,
   scheine:[], kolonne:null, schwerpunkt:[], benefits:[], wunschgehalt:3200, gehaltAnswered:false, start:null,
   skipped:[],                                 // übersprungene Zusatzfragen (Screen-IDs)
-  deepDone:false, submitted:false, enrichMode:false,
+  deepDone:false, submitted:false,
+  formStarted:false, leadSent:false, profileSent:false,  // Event-/Submit-Guards (kein Doppelversand)
   firstName:'', lastName:'', phone:'', email:'', channel:'whatsapp', consentShare:false,
 };
 
@@ -1076,10 +1107,12 @@ fetch('plz.json').then(r=>r.json()).then(d=>{
 
 /* ---------- Navigation + Fortschritt ---------- */
 const PROGRESS = {
-  's-branche':12, 's-rolle':25, 's-quali':38, 's-herkunft':38, 's-deutsch':46, 's-bl2':48,
-  's-standort':55, 's-upsell':65,
-  's-gehalt':70, 's-benefits':76, 's-exp':81, 's-scheine':86, 's-kolonne':90, 's-schwerpunkt':86, 's-start':93,
-  's-gate':96, 's-done':100, 's-done2':100,
+  /* Teil A – Lead sichern (Frage 1 = Branche im Hero, ohne Balken) */
+  's-rolle':30, 's-standort':55, 's-gate':80, 's-teilb':100,
+  /* Teil B – Profil vervollständigen (Balken startet bewusst neu) */
+  's-quali':10, 's-herkunft':10, 's-deutsch':20, 's-bl2':20,
+  's-gehalt':32, 's-benefits':46, 's-exp':58, 's-scheine':70, 's-kolonne':80, 's-schwerpunkt':75, 's-start':90,
+  's-done':100, 's-done2':100,
 };
 /* Browser-Zurück & Wisch-Geste bleiben im Funnel statt rauszuwerfen (Feedback Jana) */
 let NAV_POP=false;
@@ -1113,55 +1146,83 @@ function go(id){
   if(id!=='s-hero') gcFunnelTrack('slide_view', id);
 }
 
-/* Basis-Fragen dynamisch nummerieren (Varianten überspringen Screens) */
+/* Teil-A-Nummerierung (Frage 1 = Branche im Hero; Varianten haben sie vorbelegt) */
 function renumberBasics(){
-  let n=1;
-  const total = S.variant==='bauleiter' ? 2 : (S.branche&&S.variant ? 2 : 3);
+  const preset=!!(S.variant&&S.branche);
+  const total= preset ? 2 : 3;
   const setStep=(id,label)=>{ const el=document.querySelector('#'+id+' [data-qstep]'); if(el) el.textContent=label; };
-  if(!(S.variant&&S.branche)) setStep('s-branche','Frage '+(n++)+' von '+total);
-  if(S.variant!=='bauleiter') setStep('s-rolle','Frage '+(n++)+' von '+total);
-  setStep('s-quali','Frage '+n+' von '+total);
-  setStep('s-standort','Standort');
+  setStep('s-rolle','Frage '+(preset?1:2)+' von '+total);
+  setStep('s-standort','Frage '+(preset?2:3)+' von '+total);
 }
 
-function start(){
+/* form_start = erste echte Interaktion (Klick auf eine Hero-Kachel) */
+function formStart(){
+  if(S.formStarted) return;
+  S.formStarted=true;
+  gcFunnelTrack('form_start', null);
   track('funnel_start',{variant:S.variant||'default'});
   track('ViewContent',{content_name:'bewerbungsfunnel', content_category:S.branche||'gruene_branche'});
-  renumberBasics();
-  if(S.variant==='bauleiter'){ afterRolle(); return; }
-  if(S.branche){ buildRolle(); go('s-rolle'); return; }
-  go('s-branche');
 }
-function goBackFromRolle(){ (S.variant&&S.branche) ? go('s-hero') : go('s-branche'); }
-function goBackFromStandort(){
-  if(S.rolleClass==='bauleiter'){ go('s-bl2'); }
-  else if(S.rolleClass==='azubi'){ go('s-rolle'); }
-  else if(S.rolleClass==='helfer'){ showExp('helfer'); }
-  else if(S.rolleClass==='quereinsteiger'){ go('s-deutsch'); }
-  else if(S.ausbildung===false){ showExp('quali'); }
-  else { go('s-quali'); }
-}
-function goBackFromGate(){ S.deepDone ? go('s-start') : go('s-upsell'); }
 
-/* ---------- Q: Branche ---------- */
-(function buildBranche(){
-  const box=document.getElementById('brancheOpts');
+/* step_complete je Schritt, dedupliziert (Mehrfach-Klicks/Korrekturen zählen einmal) */
+const STEP_DONE=new Set();
+function stepComplete(id){
+  if(STEP_DONE.has(id)) return;
+  STEP_DONE.add(id);
+  gcFunnelTrack('step_complete', id);
+}
+
+function goBackFromRolle(){ go('s-hero'); }
+function goBackFromStandort(){ (S.variant&&S.branche) ? go('s-hero') : go('s-rolle'); }
+function goBackFromGate(){ go('s-standort'); }
+
+/* ---------- Hero-Kacheln: Frage 1 above the fold ----------
+   Generisch: Branchen-Auswahl. Bei Varianten mit vorbelegter Branche zeigt das
+   Hero stattdessen die Positions-Frage (erste OFFENE Frage, kein Leerklick). */
+function buildHeroTiles(){
+  const box=document.getElementById('heroTiles');
   box.innerHTML='';
-  for(const key in BRANCHEN){
-    const b=BRANCHEN[key];
-    const btn=document.createElement('button');
-    btn.className='opt';
-    btn.innerHTML='<span class="ico">'+b.icon+'</span><span class="meta">'+b.label+'<small>'+b.sub+'</small></span><span class="check">✓</span>';
-    btn.onclick=()=>{
-      box.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
-      btn.classList.add('sel');
-      S.branche=key;
-      track('q_branche',{branche:key});
-      setTimeout(()=>{ buildRolle(); go('s-rolle'); },220);
-    };
-    box.appendChild(btn);
+  if(S.variant&&S.branche){
+    document.getElementById('heroQTitle').textContent='Als was bewirbst du dich?';
+    box.classList.add('single');
+    (POSITIONEN[S.branche]||[]).forEach(p=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='hero-tile'+(S.rolle===p.key?' sel':'');
+      btn.innerHTML='<span class="tic">'+p.icon+'</span><span>'+p.label+'</span>';
+      btn.onclick=()=>{
+        formStart();
+        box.querySelectorAll('.hero-tile').forEach(t=>t.classList.remove('sel'));
+        btn.classList.add('sel');
+        S.rolle=p.key; S.rolleClass=p.cls; S.rolleLabel=p.label;
+        track('q_rolle',{rolle:p.key, cls:p.cls, branche:S.branche});
+        stepComplete('s-hero');
+        renumberBasics();
+        setTimeout(()=>go('s-standort'),200);
+      };
+      box.appendChild(btn);
+    });
+  } else {
+    for(const key in BRANCHEN){
+      const b=BRANCHEN[key];
+      const btn=document.createElement('button');
+      btn.type='button'; btn.className='hero-tile';
+      btn.innerHTML='<span class="tic">'+b.icon+'</span><span>'+b.short+'</span>';
+      btn.onclick=()=>{
+        formStart();
+        box.querySelectorAll('.hero-tile').forEach(t=>t.classList.remove('sel'));
+        btn.classList.add('sel');
+        S.branche=key;
+        track('q_branche',{branche:key});
+        stepComplete('s-hero');
+        renumberBasics();
+        setTimeout(()=>{ buildRolle(); go('s-rolle'); },200);
+      };
+      box.appendChild(btn);
+    }
   }
-})();
+}
+buildHeroTiles();
 
 /* ---------- Q: Position (Weiche über Rollen-Klasse) ---------- */
 function buildRolle(){
@@ -1182,28 +1243,12 @@ function buildRolle(){
     box.appendChild(btn);
   });
 }
-/* Weiche nach Position:
-   Leitung        -> Erfahrungs-Regler + Qualifikation
-   Azubi          -> direkt Standort
-   Helfer         -> Erfahrungs-Regler (Branchenerfahrung, keine Ausbildungs-Frage)
-   Quereinsteiger -> Herkunft + Deutschkenntnisse (Qualitäts-Filter)
-   sonst          -> Ausbildungs-Frage (nur Ja/Nein) */
+/* Teil A: Nach der Position geht es direkt zum Standort — alle Quali-Fragen
+   (Ausbildung/Erfahrung/Quereinstieg/Deutsch/Leitungs-Quali) leben jetzt in
+   Teil B ("Profil vervollständigen"), NACH der Lead-Sicherung. */
 function afterRolle(){
-  if(S.rolleClass==='bauleiter'){
-    showExp('bl');
-  } else if(S.rolleClass==='azubi'){
-    go('s-standort');
-  } else if(S.rolleClass==='helfer'){
-    showExp('helfer');
-  } else if(S.rolleClass==='quereinsteiger'){
-    const base=(S.variant&&S.branche)?1:2, total=base+2;
-    document.getElementById('herkunftStep').textContent='Frage '+(base+1)+' von '+total;
-    document.getElementById('deutschStep').textContent='Frage '+(base+2)+' von '+total;
-    go('s-herkunft');
-  } else {
-    document.getElementById('qualiTitle').textContent='Hast du eine abgeschlossene Ausbildung '+(S.branche?BRANCHEN[S.branche].inPhrase:'in der Branche')+'?';
-    go('s-quali');
-  }
+  stepComplete('s-rolle');
+  go('s-standort');
 }
 
 /* ---------- Q: Quereinsteiger-Herkunft + Deutschkenntnisse ---------- */
@@ -1218,6 +1263,8 @@ function afterRolle(){
       box.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
       btn.classList.add('sel'); S.herkunft=key;
       track('q_herkunft',{herkunft:key});
+      stepComplete('s-herkunft');
+      teilBSync();
       setTimeout(()=>go('s-deutsch'),220);
     };
     box.appendChild(btn);
@@ -1232,19 +1279,23 @@ function afterRolle(){
       box.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
       btn.classList.add('sel'); S.deutsch=key;
       track('q_deutsch',{deutsch:key});
-      setTimeout(()=>go('s-standort'),220);
+      stepComplete('s-deutsch');
+      teilBSync();
+      setTimeout(()=>teilBAfterQuali(),220);
     };
     box.appendChild(btn);
   }
 })();
 
-/* ---------- Q: Ausbildung (Ja -> Standort, Nein -> Erfahrungs-Regler) ---------- */
+/* ---------- Q: Ausbildung (Teil B; Ja -> weiter, Nein -> Erfahrungs-Regler) ---------- */
 function setAusbildung(val,btn){
   S.ausbildung=val;
   document.querySelectorAll('#qualiChips .chip').forEach(c=>c.classList.remove('sel'));
   btn.classList.add('sel');
   track('q_ausbildung',{ausbildung:val?'ja':'nein'});
-  setTimeout(()=>{ val ? go('s-standort') : showExp('quali'); },220);
+  stepComplete('s-quali');
+  teilBSync();
+  setTimeout(()=>{ val ? teilBAfterQuali() : showExp('quali'); },220);
 }
 
 /* ---------- Q: Berufserfahrung (Regler, 3 Kontexte) ----------
@@ -1260,14 +1311,14 @@ function showExp(ctx){
     ? 'Wie viele Jahre Berufserfahrung hast du als '+S.rolleLabel+'?'
     : 'Wie viele Jahre Berufserfahrung hast du'+inBranche+'?';
   document.getElementById('expStep').textContent = ctx==='deep'
-    ? (document.getElementById('expStep').dataset.deepLabel||'Zusatzfrage')
-    : 'Deine Berufserfahrung';
+    ? (document.getElementById('expStep').dataset.deepLabel||'Profil vervollständigen')
+    : 'Profil vervollständigen';
   document.getElementById('expSkipRow').style.display = ctx==='deep' ? 'flex' : 'none';
   const cur = ctx==='bl' ? S.blErfahrung : S.expYears;
   const val = cur===null||cur===undefined ? 5 : cur;
   document.getElementById('expRange').value=val;
   document.getElementById('expVal').textContent=fmtYears(val);
-  PROGRESS['s-exp'] = ctx==='deep' ? 81 : 44;
+  PROGRESS['s-exp'] = ctx==='deep' ? 58 : 12;
   go('s-exp');
 }
 function expInput(v){ document.getElementById('expVal').textContent=fmtYears(+v); }
@@ -1276,11 +1327,15 @@ function expNext(skipped){
   if(expContext==='bl'){
     S.blErfahrung=v;
     track('q_bl_erfahrung',{jahre:v});
+    stepComplete('s-exp');
+    teilBSync();
     go('s-bl2');
   } else if(expContext==='quali'||expContext==='helfer'){
     S.expYears=v; unskip('s-exp');
     track('q_erfahrung',{jahre:v, kontext:'basis'});
-    go('s-standort');
+    stepComplete('s-exp');
+    teilBSync();
+    teilBAfterQuali();
   } else {
     if(skipped){ S.expYears=null; markSkipped('s-exp'); }
     else { S.expYears=v; unskip('s-exp'); }
@@ -1289,10 +1344,16 @@ function expNext(skipped){
   }
 }
 function expBackBtn(){
-  if(expContext==='bl'){ (S.variant==='bauleiter') ? go('s-hero') : go('s-rolle'); }
-  else if(expContext==='helfer'){ go('s-rolle'); }
+  if(expContext==='bl'){ go('s-teilb'); }
+  else if(expContext==='helfer'){ go('s-teilb'); }
   else if(expContext==='quali'){ go('s-quali'); }
   else { deepBack('s-exp'); }
+}
+/* Weiter-Klick nach der Leitungs-Qualifikation (Teil B) */
+function bl2Next(){
+  stepComplete('s-bl2');
+  teilBSync();
+  teilBAfterQuali();
 }
 
 /* ---------- Überspringen (nur Zusatzfragen) ---------- */
@@ -1414,7 +1475,9 @@ document.addEventListener('click',ev=>{ if(!ev.target.closest('.loc-box')) acHid
   }
 })();
 function updateLocBtn(){ document.getElementById('locBtn').disabled = !(S.plz && S.radius); }
-function afterStandort(){ updateUpsellCount(); go('s-upsell'); }
+/* Teil A: Nach dem Standort kommt direkt das Kontakt-Gate — der Lead wird
+   VOR den Profil-Fragen gesichert (Umbau 2026-08, Conversion-Hebel #2). */
+function afterStandort(){ stepComplete('s-standort'); buildGateSummary(); go('s-gate'); }
 
 /* ---------- Zusatzfragen: dynamischer Pfad ----------
    Reihenfolge nach Relevanz für den Bewerber: erst was IHN interessiert
@@ -1433,24 +1496,38 @@ function deepPath(){
   p.push('s-start');
   return p;
 }
-function updateUpsellCount(){
-  const n=deepPath().length;
-  document.getElementById('upsellCount').textContent=n+' Zusatzfragen';
-  document.getElementById('enrichCount').textContent=n+' kurze Zusatzfragen';
-}
 let DEEP=[];
-function startDeep(enrich){
-  S.enrichMode=!!enrich;
-  DEEP=deepPath();
-  track(enrich?'deep_start_after_submit':'deep_start',{});
+/* ---------- TEIL B: Profil vervollständigen (nach der Lead-Sicherung) ----------
+   Einstieg über die rollenspezifischen Quali-Fragen (Ausbildung/Erfahrung/
+   Quereinstieg/Deutsch/Leitungs-Quali), danach die übrigen Fragen (deepPath). */
+function startTeilB(){
+  track('teilb_start',{});
   /* Slider-Startwert passend zur Position */
   const def=GEHALT_DEFAULT[S.rolleClass]||3200;
-  S.wunschgehalt=def;
-  document.getElementById('gehaltRange').value=def;
-  document.getElementById('gehaltVal').textContent=def.toLocaleString('de-DE');
+  if(!S.gehaltAnswered){
+    S.wunschgehalt=def;
+    document.getElementById('gehaltRange').value=def;
+    document.getElementById('gehaltVal').textContent=def.toLocaleString('de-DE');
+  }
   buildDeepScreens();
+  ['herkunftStep','deutschStep'].forEach(id=>{ document.getElementById(id).textContent='Profil vervollständigen'; });
+  const q=document.querySelector('#s-quali [data-qstep]'); if(q) q.textContent='Profil vervollständigen';
+  const cls=S.rolleClass;
+  if(cls==='bauleiter'){ showExp('bl'); }
+  else if(cls==='quereinsteiger'){ go('s-herkunft'); }
+  else if(cls==='helfer'){ showExp('helfer'); }
+  else if(cls==='azubi'){ teilBAfterQuali(); }
+  else {
+    document.getElementById('qualiTitle').textContent='Hast du eine abgeschlossene Ausbildung '+(S.branche?BRANCHEN[S.branche].inPhrase:'in der Branche')+'?';
+    go('s-quali');
+  }
+}
+/* Nach der Quali-Kette: übrige Fragen. deepPath() erst JETZT festnageln,
+   weil die Erfahrung ggf. gerade beantwortet wurde (s-exp fällt dann raus). */
+function teilBAfterQuali(){
+  DEEP=deepPath();
   DEEP.forEach((id,i)=>{
-    const label='Zusatzfrage '+(i+1)+' von '+DEEP.length;
+    const label='Profil vervollständigen · '+(i+1)+' von '+DEEP.length;
     if(id==='s-exp'){ document.getElementById('expStep').dataset.deepLabel=label; return; }
     const el=document.querySelector('#'+id+' [data-qstep]');
     if(el) el.textContent=label;
@@ -1459,7 +1536,6 @@ function startDeep(enrich){
 }
 /* Navigation innerhalb der Zusatzfragen (s-exp braucht seinen Kontext) */
 function deepGo(id){ id==='s-exp' ? showExp('deep') : go(id); }
-function skipDeep(){ track('deep_skipped',{}); buildGateSummary(); go('s-gate'); }
 /* Multi-Select-Fragen: leer weiterklicken = übersprungen */
 function markMultiSkips(cur){
   if(cur==='s-benefits'){ S.benefits.length ? unskip(cur) : markSkipped(cur); }
@@ -1468,16 +1544,30 @@ function markMultiSkips(cur){
 }
 function deepNext(cur){
   markMultiSkips(cur);
+  if(!S.skipped.includes(cur)) stepComplete(cur);
   const i=DEEP.indexOf(cur);
-  if(i<DEEP.length-1){ deepGo(DEEP[i+1]); return; }
+  if(i<DEEP.length-1){ teilBSync(); deepGo(DEEP[i+1]); return; }
+  /* Teil B abgeschlossen -> selbe Sheet-Zeile final updaten (status=profile_completed) */
   S.deepDone=true;
-  if(S.enrichMode){ sendLead('lead_enriched'); go('s-done2'); }
-  else { buildGateSummary(); go('s-gate'); }
+  if(!S.profileSent){
+    S.profileSent=true;
+    LETZTER_SCHRITT++;
+    gcFunnelTrack('profile_completed', null);
+    sendLead('profile_completed');
+  }
+  go('s-done2');
 }
 function deepBack(cur){
   const i=DEEP.indexOf(cur);
   if(i>0){ deepGo(DEEP[i-1]); return; }
-  S.enrichMode ? go('s-done') : go('s-upsell');
+  /* Anfang der übrigen Fragen -> zurück in die Quali-Kette bzw. zum Intro */
+  const cls=S.rolleClass;
+  if(cls==='bauleiter'){ go('s-bl2'); }
+  else if(cls==='quereinsteiger'){ go('s-deutsch'); }
+  else if(cls==='helfer'){ showExp('helfer'); }
+  else if(cls==='azubi'){ go('s-teilb'); }
+  else if(S.ausbildung===false){ showExp('quali'); }
+  else { go('s-quali'); }
 }
 
 function buildDeepScreens(){
@@ -1635,11 +1725,18 @@ function submitGate(){
   if(msg){ err.textContent=msg; err.style.display='block'; return; }
   err.style.display='none';
   S.submitted=true;
-  gcFunnelTrack('submit_success', null);
-  sendLead('lead_captured');
+  stepComplete('s-gate');
+  /* Lead JETZT sichern (Teil A komplett) — Meta-"Lead" bleibt an diesem Submit.
+     Guard verhindert Doppelversand, falls jemand per Browser-Back nochmal absendet. */
+  if(!S.leadSent){
+    S.leadSent=true;
+    LETZTER_SCHRITT=4;
+    gcFunnelTrack('lead_captured', null);
+    sendLead('lead_captured');
+  }
+  document.getElementById('teilbTitle').textContent='Top, '+S.firstName+' – deine Bewerbung ist gesichert!';
   document.getElementById('doneTitle').textContent='Top, '+S.firstName+'! 🌱';
-  document.getElementById('enrichBox').style.display = S.deepDone ? 'none' : 'block';
-  go('s-done');
+  go('s-teilb');
 }
 
 /* ---------- Lead senden (Struktur wie Gehalts-Check, source=bewerbungsfunnel) ---------- */
@@ -1650,7 +1747,8 @@ function toE164(raw){
   else if(p.charAt(0)==='0') p='49'+p.slice(1);
   return p;
 }
-const META_EVENT_MAP = { lead_captured:'Lead', lead_enriched:'CompleteRegistration' };
+/* profile_completed hieß bis 2026-08 'lead_enriched' — Alt-Zeilen im Sheet behalten den alten Namen. */
+const META_EVENT_MAP = { lead_captured:'Lead', profile_completed:'CompleteRegistration' };
 /* Sheet-freundliche Label: übersprungene Frage -> 'Frage übersprungen' statt leer */
 const SKIP_LABELS = {'s-gehalt':'Wunschgehalt','s-benefits':'Benefits','s-exp':'Berufserfahrung','s-scheine':'Führerscheine/Scheine','s-kolonne':'Kolonnenführung','s-start':'Verfügbarkeit'};
 function lbl(id,val){ return S.skipped.includes(id) ? 'Frage übersprungen' : val; }
@@ -1681,13 +1779,28 @@ function buildNachricht(){
   add('Eigene Ergänzung', S.note||null);
   return 'Bewerbung über den GreenCareers-Bewerbungsfunnel (Meta-Anzeige):\n\n'+L.join('\n');
 }
-function sendLead(event){
-  const metaEvent = META_EVENT_MAP[event] || event;
-  const eventId = track(metaEvent, {
+/* Fortschritts-Zähler für die Sheet-Spalte letzter_schritt (Teil A = 4 Schritte) */
+let LETZTER_SCHRITT=4;
+/* Nach jedem abgeschlossenen Teil-B-Schritt: DIESELBE Sheet-Zeile aktualisieren
+   (Upsert per lead_id in Make) — bricht jemand ab, ist nichts verloren. */
+function teilBSync(){
+  if(!S.leadSent || S.profileSent) return;
+  LETZTER_SCHRITT++;
+  sendLead('lead_captured', true);
+}
+function sendLead(event, isStepUpdate){
+  /* Step-Updates schreiben nur das Sheet fort — KEIN neues Meta-Event
+     (Lead/CompleteRegistration feuern exakt einmal, an ihren Submits). */
+  const metaEvent = isStepUpdate ? null : (META_EVENT_MAP[event] || event);
+  const eventId = isStepUpdate ? null : track(metaEvent, {
     content_name:'bewerbungsfunnel', content_category:S.branche||'',
   });
   const payload={
     event, ts:new Date().toISOString(),
+    /* --- Upsert-Schlüssel + Fortschritt (Spalten AG–AJ) --- */
+    lead_id: LEAD_ID,
+    letzter_schritt: LETZTER_SCHRITT,
+    aktualisiert_am: new Date().toISOString(),
     /* --- Meta CAPI (Server-to-Server) --- */
     meta_event_name: metaEvent,
     event_id: eventId,
@@ -1732,7 +1845,8 @@ function sendLead(event){
   };
   console.log('[LEAD]',payload);
   if(LEAD_WEBHOOK){
-    fetch(LEAD_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+    /* keepalive: Request überlebt auch einen sofortigen Tab-Wechsel/-Schluss */
+    fetch(LEAD_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(()=>{});
   }
 }
 
