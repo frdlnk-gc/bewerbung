@@ -1549,7 +1549,11 @@ function deepNext(cur){
   if(i<DEEP.length-1){ teilBSync(); deepGo(DEEP[i+1]); return; }
   /* Teil B abgeschlossen -> selbe Sheet-Zeile final updaten (status=profile_completed) */
   S.deepDone=true;
-  if(!S.profileSent){
+  /* Nur mit gesichertem Lead: Metas Ad-Review-Crawler klickt nach dem Laden ALLE Buttons
+     im DOM durch (auch versteckte Screens) und traf so diesen Abschluss ohne Gate ->
+     leere profile_completed-Zeilen im Sheet + Fake-CompleteRegistration (17.08.).
+     Gleicher Schutz für Reload + Browser-"Vor" (State leer, lead_id aber noch da). */
+  if(!S.profileSent && S.leadSent){
     S.profileSent=true;
     LETZTER_SCHRITT++;
     gcFunnelTrack('profile_completed', null);
@@ -1789,6 +1793,9 @@ function teilBSync(){
   sendLead('lead_captured', true);
 }
 function sendLead(event, isStepUpdate){
+  /* Ohne validiertes Gate (submitGate setzt S.leadSent) geht NICHTS raus —
+     zentraler Riegel gegen Bot-Klicks und leere Upsert-Payloads. */
+  if(!S.leadSent) return;
   /* Step-Updates schreiben nur das Sheet fort — KEIN neues Meta-Event
      (Lead/CompleteRegistration feuern exakt einmal, an ihren Submits). */
   const metaEvent = isStepUpdate ? null : (META_EVENT_MAP[event] || event);
