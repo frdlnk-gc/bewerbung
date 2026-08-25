@@ -744,20 +744,6 @@ function err(msg,inp){
   box.textContent=msg; box.classList.add('show');
   if(inp){ inp.classList.add('bad'); inp.focus(); }
 }
-function submit(){
-  var box=document.getElementById('formErr'); box.classList.remove('show');
-  ['fName','fTel','fMail'].forEach(function(i){ document.getElementById(i).classList.remove('bad'); });
-  var name=document.getElementById('fName').value.trim();
-  var tel=document.getElementById('fTel').value.trim();
-  var mail=document.getElementById('fMail').value.trim();
-  if(name.length<2) return err('Bitte gib deinen Namen ein.',document.getElementById('fName'));
-  if(tel.replace(/\D/g,'').length<7) return err('Bitte gib eine gültige Handynummer ein.',document.getElementById('fTel'));
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return err('Bitte gib eine gültige E-Mail-Adresse ein.',document.getElementById('fMail'));
-  if(!document.getElementById('fConsent').checked) return err('Bitte bestätige, dass wir dich passenden Betrieben vorschlagen dürfen.');
-  S.name=name; S.telefon=tel; S.email=mail;
-
-  /* Eine Lead-ID gilt für genau EINE Bewerbung: Bei einer zweiten Bewerbung im selben Tab
-     landeten Teil-B-/Multi-Upserts sonst auf der Zeile der ersten (sessionStorage-ID). */
 function _gcCk(n){var m=document.cookie.match(new RegExp(n+'=([^;]+)'));return m?m[1]:null;}
 var _gcAD=(function(){var p=new URLSearchParams(location.search);return {ad_id:p.get('ad_id')||null,adset_id:p.get('adset_id')||null,campaign_id:p.get('campaign_id')||null,ad_name:p.get('ad_name')||null,adset_name:p.get('adset_name')||null,campaign_name:p.get('campaign_name')||null};})();
 var GC_CONSENT_TEXT='Ja, GreenCareers darf meine Angaben an passende Partnerbetriebe der grünen Branche weitergeben. Diese dürfen mich zu passenden Stellenangeboten per Telefon, WhatsApp und E-Mail kontaktieren. Freiwillig, jederzeit mit Wirkung für die Zukunft widerrufbar.';
@@ -793,6 +779,20 @@ function gcBuildPayload(ev){
   for(var k in _gcAD){ pl[k]=_gcAD[k]; }
   return pl;
 }
+function submit(){
+  var box=document.getElementById('formErr'); box.classList.remove('show');
+  ['fName','fTel','fMail'].forEach(function(i){ document.getElementById(i).classList.remove('bad'); });
+  var name=document.getElementById('fName').value.trim();
+  var tel=document.getElementById('fTel').value.trim();
+  var mail=document.getElementById('fMail').value.trim();
+  if(name.length<2) return err('Bitte gib deinen Namen ein.',document.getElementById('fName'));
+  if(tel.replace(/\D/g,'').length<7) return err('Bitte gib eine gültige Handynummer ein.',document.getElementById('fTel'));
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return err('Bitte gib eine gültige E-Mail-Adresse ein.',document.getElementById('fMail'));
+  if(!document.getElementById('fConsent').checked) return err('Bitte bestätige, dass wir dich passenden Betrieben vorschlagen dürfen.');
+  S.name=name; S.telefon=tel; S.email=mail;
+
+  /* Eine Lead-ID gilt für genau EINE Bewerbung: Bei einer zweiten Bewerbung im selben Tab
+     landeten Teil-B-/Multi-Upserts sonst auf der Zeile der ersten (sessionStorage-ID). */
   try{
     if(sessionStorage.getItem('gcf_used_'+LEAD_ID) || sessionStorage.getItem('gc_multi_'+LEAD_ID)){
       LEAD_ID=gcUuid(); sessionStorage.setItem('gcf_lead_id',LEAD_ID);
