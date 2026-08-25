@@ -3,6 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script>
+/* 50/50-Splittest v1/v2 (sticky pro Browser via localStorage). ?novariant=1 erzwingt v1, ?variant=v2 erzwingt v2. */
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    if(q.has('novariant')){ localStorage.setItem('gc_lp_var','v1'); return; }
+    if(q.has('variant')){ var f=(q.get('variant')==='v2')?'v2':'v1'; localStorage.setItem('gc_lp_var',f); if(f==='v2'){ location.replace('/v2/'+location.search); } return; }
+    var v=localStorage.getItem('gc_lp_var');
+    if(!v){ v=(Math.random()<0.5)?'v2':'v1'; localStorage.setItem('gc_lp_var',v); }
+    if(v==='v2') location.replace('/v2/'+location.search);
+  }catch(e){}
+})();
+</script>
 <link rel="icon" type="image/png" href="https://gehaltscheck.green-careers.de/favicon.png">
 <title>Die besten Jobs der grünen Branche – Top-Arbeitgeber melden sich bei dir | GreenCareers</title>
 <meta name="description" content="Deutschlands größtes Karrierenetzwerk für GaLaBau, Grünpflege, Baumschule, Gärtnerei, Gartencenter, Friedhofsgärtnerei, Baumpflege, Forst & Tiefbau. Bewirb dich in 2 Minuten – ohne Lebenslauf, ohne Anschreiben. Wir schlagen dich den besten Arbeitgebern deiner Region vor. Kostenlos, unverbindlich, jederzeit austragbar.">
@@ -1821,6 +1834,7 @@ function sendLead(event, isStepUpdate){
     phone:S.phone, phone_e164:toE164(S.phone), email:S.email, preferred_channel:S.channel,
     /* --- Basis-Antworten --- */
     variant:S.variant||'default',
+    lp_variante:'v1',
     branche:S.branche, branche_label:S.branche?BRANCHEN[S.branche].label:null,
     rolle:S.rolle, rolle_label:S.rolleLabel, rolle_klasse:S.rolleClass,
     ausbildung:S.ausbildung,
