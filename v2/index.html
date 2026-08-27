@@ -740,15 +740,69 @@ function err(msg,inp){
   if(inp){ inp.classList.add('bad'); inp.focus(); }
 }
 function _gcCk(n){var m=document.cookie.match(new RegExp(n+'=([^;]+)'));return m?m[1]:null;}
+
+/* ---------- PLZ-Datenbank (Ort + Kreis + Bundesland) ----------
+   Das Feld "PLZ oder Wohnort" ist Freitext: Wer nur "56271" tippt, lieferte bisher
+   eine leere Ort-Spalte (7 von 8 v2-Zeilen am 26.08.), wer nur "Dortmund" tippt, gar
+   keine PLZ. Dieselbe plz.json wie die v1-LP liegt eine Ebene höher. */
+var PLZDB=null;
+/* Wie v1, zusätzlich Kreis-Namen ohne Präfix ("Westerwaldkreis", "Saalekreis"):
+   ohne die Endung wurde Maroth zu "Westerwaldkreis" umgeschrieben. */
+var KREIS_RE=/^(Landkreis|Kreis |Region |Städteregion|Regionalverband|Kreisfreie|Stadt )|kreis$/;
+fetch('../plz.json').then(function(r){return r.json();}).then(function(d){ PLZDB=d; }).catch(function(){});
+/* Ein plz.json-Eintrag ist "Ort|Kreis|BL" oder "Ort|BL". Steht in Feld 2 kein echter
+   Kreis, ist die PLZ eine Großempfänger-PLZ (Feld 1 = Firma) und Feld 2 der echte Ort:
+   04328 "Sellerhausen-Stünz|Leipzig" -> Leipzig, 30686 "E.ON Real Estate|Dortmund" -> Dortmund. */
+function gcPlzEntry(plz){
+  if(!PLZDB||!PLZDB[plz]) return null;
+  var p=PLZDB[plz].split('|'), ort, kreis, bl;
+  if(p.length===3){ ort=p[0]; kreis=p[1]; bl=p[2]; } else { ort=p[0]; kreis=''; bl=p[1]; }
+  if(kreis && !KREIS_RE.test(kreis)){ ort=kreis; kreis=''; }
+  return {ort:ort, kreis:kreis||null, bl:bl||null};
+}
+/* Freitext "56271" / "Dortmund" / "44135 Dortmund" -> {plz, ort, kreis, region}.
+   Bewusst KEIN Rückwärts-Lookup Ort -> PLZ: plz.json enthält Großempfänger-PLZ, über
+   die "Dortmund" auf 30686 (Hannover) gematcht hätte. Eine falsche PLZ ist schlimmer
+   als keine — die Umkreissuche würde damit hunderte Kilometer danebenliegen. */
+function gcParseStandort(raw){
+  var po=(raw||'').trim();
+  var plz=(po.match(/\b\d{5}\b/)||[''])[0];
+  var ort=po.replace(/\b\d{5}\b/,'').replace(/^[,\s]+|[,\s]+$/g,'');
+  var kreis=null, region=null;
+  if(plz){
+    var e=gcPlzEntry(plz);
+    if(e){ if(!ort) ort=e.ort; kreis=e.kreis; region=e.bl; }
+  }
+  return {plz:plz, ort:ort||null, kreis:kreis, region:region};
+}
+
+/* ---------- Bewerber-Nachricht ----------
+   Jana zieht sich die Bewerber-Infos aus dieser EINEN Spalte (Feedback 26.08.):
+   Bis dahin standen hier nur Situation/Verfügbar/Nachricht — Bereich, Qualifikation,
+   Berufserfahrung, Führerschein und Standort fehlten komplett, beim ersten Submit war
+   die Zelle sogar leer. Aufbau + Labels bewusst identisch zur v1-LP, damit beide
+   Varianten im selben Schema gelesen werden können. */
+function gcBuildNachricht(st){
+  var L=[];
+  var add=function(k,v){ if(v!==null&&v!==undefined&&v!=='') L.push(k+': '+v); };
+  add('Branche', S.fachrichtung);
+  add('Qualifikation', S.qualifikation);
+  add('Berufserfahrung', S.erfahrung);
+  add('Führerscheine / Scheine', S.fuehrerschein);
+  add('Standort', st.plz ? (st.plz+(st.ort?' '+st.ort:'')) : st.ort);
+  add('Aktuelle Situation', S.situation);
+  add('Verfügbar', S.verfuegbarkeit);
+  add('Eigene Ergänzung', S.nachricht);
+  return L.length ? 'Bewerbung über den GreenCareers-Bewerbungsfunnel (Meta-Anzeige):\n\n'+L.join('\n') : null;
+}
 var _gcAD=(function(){var p=new URLSearchParams(location.search);return {ad_id:p.get('ad_id')||null,adset_id:p.get('adset_id')||null,campaign_id:p.get('campaign_id')||null,ad_name:p.get('ad_name')||null,adset_name:p.get('adset_name')||null,campaign_name:p.get('campaign_name')||null};})();
 var GC_CONSENT_TEXT='Ja, GreenCareers darf meine Angaben an passende Partnerbetriebe der grünen Branche weitergeben. Diese dürfen mich zu passenden Stellenangeboten per Telefon, WhatsApp und E-Mail kontaktieren. Freiwillig, jederzeit mit Wirkung für die Zukunft widerrufbar.';
 function gcBuildPayload(ev){
   var np=(S.name||'').trim().split(/\s+/);
-  var po=(S.plz_ort||'').trim(); var plz=(po.match(/\b\d{5}\b/)||[''])[0];
-  var ort=po.replace(/\b\d{5}\b/,'').replace(/^[,\s]+|[,\s]+$/g,'');
+  var st=gcParseStandort(S.plz_ort);
+  var plz=st.plz, ort=st.ort;
   var e164=(function(x){x=(x||'').replace(/[^\d+]/g,'');if(x.indexOf('00')===0)x='+'+x.slice(2);if(x.indexOf('0')===0)x='+49'+x.slice(1);return x;})(S.telefon);
   var profil=(ev==='profile_completed');
-  var zus=[]; if(S.situation)zus.push('Situation: '+S.situation); if(S.verfuegbarkeit)zus.push('Verf\u00fcgbar: '+S.verfuegbarkeit); if(S.nachricht)zus.push('Nachricht: '+S.nachricht);
   var pl={
     event:ev, ts:new Date().toISOString(),
     lead_id:LEAD_ID, letzter_schritt:(profil?'s-b4':'s-kontakt'), aktualisiert_am:new Date().toISOString(),
@@ -762,10 +816,10 @@ function gcBuildPayload(ev){
     ausbildung:S.qualifikation, erfahrung_jahre:null, erfahrung_label:S.erfahrung,
     scheine_labels:S.fuehrerschein,
     verfuegbarkeit:S.verfuegbarkeit||null, verfuegbarkeit_label:S.verfuegbarkeit||null,
-    plz:plz, ort:ort,
+    plz:plz, ort:ort, kreis:st.kreis, region:st.region,
     deep_completed:profil,
     bemerkung:S.nachricht||null,
-    bewerber_nachricht:(zus.length?zus.join(' \u00b7 '):null),
+    bewerber_nachricht:gcBuildNachricht(st),
     source:'bewerbungsfunnel',
     consent_version:'bewerbung-2026-07-v1',
     consent_share:!!(document.getElementById('fConsent')&&document.getElementById('fConsent').checked),
