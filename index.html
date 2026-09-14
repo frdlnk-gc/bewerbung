@@ -1713,7 +1713,7 @@ function buildGateSummary(){
   if(S.gehaltAnswered) tags.push('💶 '+S.wunschgehalt.toLocaleString('de-DE')+' €');
   box.innerHTML=tags.map(t=>'<span>'+t+'</span>').join('');
 }
-function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e); }
+function validEmail(e){ return /^[^\s@.]+(?:\.[^\s@.]+)*@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/.test(e); }
 function submitGate(){
   S.firstName=document.getElementById('fFirst').value.trim();
   S.lastName=document.getElementById('fLast').value.trim();
